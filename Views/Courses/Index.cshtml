@@ -1,0 +1,146 @@
+﻿@model IEnumerable<ITI_FinalProject.Models.Course>
+
+@{
+    ViewData["Title"] = "Index";
+    var isAdmin = User.IsInRole("Admin");
+}
+
+<style>
+    .filter-bar {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 22px;
+    }
+
+        .filter-bar input[type=text] {
+            min-width: 300px;
+            padding: 14px 18px;
+            border: 1px solid #cfe6e3;
+            border-radius: 14px;
+            background: #fff;
+            font-size: 16px;
+            color: #0f3d3a;
+            outline: none;
+        }
+
+            .filter-bar input[type=text]:focus {
+                border-color: #12a594;
+                box-shadow: 0 0 0 3px rgba(18, 165, 148, .15);
+            }
+
+    .btn-filter {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: none;
+        border-radius: 14px;
+        padding: 14px 26px;
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+        cursor: pointer;
+        background: linear-gradient(135deg, #12a594, #0d7f78);
+        box-shadow: 0 6px 16px rgba(13, 127, 120, .28);
+    }
+
+        .btn-filter:hover {
+            filter: brightness(.95);
+        }
+
+    .btn-clear {
+        color: #799a9f;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+        .btn-clear:hover {
+            color: #0d7f78;
+        }
+
+    .seat {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12.5px;
+        font-weight: 700;
+    }
+
+    .seat-ok {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .seat-low {
+        background: #ffedd5;
+        color: #9a3412;
+    }
+
+    .seat-full {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+</style>
+
+<h1>Course</h1>
+
+@if (isAdmin)
+{
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+}
+
+<form asp-action="Index" method="get" class="filter-bar">
+    <input type="text" name="search" value="@ViewData["Search"]" placeholder="Search by code, title or instructor" />
+    <button type="submit" class="btn-filter">&#9660; Search</button>
+    <a asp-action="Index" class="btn-clear">Clear</a>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.Code)</th>
+            <th>@Html.DisplayNameFor(model => model.Title)</th>
+            <th>@Html.DisplayNameFor(model => model.Description)</th>
+            <th>@Html.DisplayNameFor(model => model.CreditHours)</th>
+            <th>@Html.DisplayNameFor(model => model.MaxCapacity)</th>
+            <th>Enrolled</th>
+            <th>Available seats</th>
+            <th>@Html.DisplayNameFor(model => model.Instructor)</th>
+            <th>@Html.DisplayNameFor(model => model.Department)</th>
+            @if (isAdmin)
+            {
+                <th></th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            var enrolled = item.Enrollments.Count;
+            var available = Math.Max(0, item.MaxCapacity - enrolled);
+            var seatClass = available == 0 ? "seat-full" : (available <= 5 ? "seat-low" : "seat-ok");
+            <tr>
+                <td>@item.Code</td>
+                <td>@item.Title</td>
+                <td>@item.Description</td>
+                <td>@item.CreditHours</td>
+                <td>@item.MaxCapacity</td>
+                <td>@enrolled</td>
+                <td><span class="seat @seatClass">@(available == 0 ? "Full" : available.ToString())</span></td>
+                <td>@item.Instructor</td>
+                <td>@item.Department?.Name</td>
+                @if (isAdmin)
+                {
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,88 @@
+﻿@{
+    var isAuth = User.Identity?.IsAuthenticated == true;
+    var isAdmin = User.IsInRole("Admin");
+    var isStudent = User.IsInRole("Student");
+    var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
+    var act = ViewContext.RouteData.Values["action"]?.ToString();
+    string Active(string c, string? a = null) =>
+        ctrl == c && (a == null || act == a) ? "active" : "";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Course Registration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ITI_FinalProject.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="app-nav-wrapper">
+        <nav class="app-nav">
+            <a class="app-brand" asp-controller="Home" asp-action="Index">Portal<span>Registration</span></a>
+
+            <div class="app-links">
+                @if (isStudent)
+                {
+                    <a class="@Active("Catalog", "Index")" asp-controller="Catalog" asp-action="Index">Enrollment</a>
+                    <a class="@Active("Catalog", "MyCourses")" asp-controller="Catalog" asp-action="MyCourses">My Courses</a>
+                    <a class="@Active("Courses")" asp-controller="Courses" asp-action="Index">Courses</a>
+                    <a class="@Active("Departments")" asp-controller="Departments" asp-action="Index">Departments</a>
+                }
+                else
+                {
+                    <a class="@Active("Home")" asp-controller="Home" asp-action="Index">Home</a>
+
+                    @if (isAdmin)
+                    {
+                        <a class="@Active("Students")" asp-controller="Students" asp-action="Index">Students</a>
+                        <a class="@Active("Enrollments")" asp-controller="Enrollments" asp-action="Index">Enrollments</a>
+                    }
+
+                    @if (isAuth)
+                    {
+                        <a class="@Active("Departments")" asp-controller="Departments" asp-action="Index">Departments</a>
+                        <a class="@Active("Courses")" asp-controller="Courses" asp-action="Index">Courses</a>
+                    }
+                }
+            </div>
+
+            <div class="app-auth">
+                @if (isAuth)
+                {
+                    <span class="user">@User.Identity!.Name</span>
+                    <span class="role-pill">@(isAdmin ? "Admin" : "Student")</span>
+                    <span class="sep"></span>
+                    <form asp-controller="Account" asp-action="Logout" method="post">
+                        <button type="submit">Logout</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login">Login</a>
+                    <span class="sep"></span>
+                    <a class="btn-pill" asp-controller="Account" asp-action="Register">Sign up</a>
+                }
+            </div>
+        </nav>
+    </header>
+
+    <main class="app-main" role="main">
+        <div class="content-card">
+            @RenderBody()
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        &copy; @DateTime.Now.Year Course Registration System &bull; Fast &bull; Reliable &bull; Secure
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

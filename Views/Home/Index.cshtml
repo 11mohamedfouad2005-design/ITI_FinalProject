@@ -1,0 +1,1123 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "Home";
+    var isAuth = User.Identity?.IsAuthenticated == true;
+    var startController = User.IsInRole("Admin") ? "Students" : "Courses";
+    var courseController = !isAuth ? "Account" : (User.IsInRole("Admin") ? "Students" : "Courses");
+    var courseAction = !isAuth ? "Login" : "Index";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Course Registration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --teal: #0d9488;
+            --teal-dark: #0d7f78;
+            --teal-light: #14b8a6;
+            --teal-soft: #e6f6f4;
+            --teal-glow: rgba(13, 148, 136, 0.12);
+            --ink: #0f2a2c;
+            --muted: #5f7f84;
+            --border: #e2eeec;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: #ffffff;
+            color: var(--ink);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* ---------- Navbar (Sticky & Glass) ---------- */
+        .nav-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(13, 148, 136, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 48px;
+            max-width: 1360px;
+            margin: 0 auto;
+        }
+
+        .nav-brand {
+            font-weight: 800;
+            font-size: 20px;
+            letter-spacing: -0.5px;
+            color: var(--teal-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .nav-brand span {
+                color: var(--ink);
+            }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+            .nav-links a {
+                color: #2b494d;
+                font-size: 14.5px;
+                font-weight: 600;
+                transition: color .2s ease;
+            }
+
+                .nav-links a:hover {
+                    color: var(--teal);
+                }
+
+        .nav-auth {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 14px;
+        }
+
+            .nav-auth a, .nav-auth button {
+                color: var(--teal);
+                font-weight: 600;
+                font-size: 14px;
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-family: inherit;
+                transition: all .2s;
+            }
+
+            .nav-auth .btn-pill {
+                padding: 9px 22px;
+                background: var(--teal);
+                color: #ffffff !important;
+                border-radius: 30px;
+                box-shadow: 0 4px 14px rgba(13, 148, 136, 0.25);
+            }
+
+                .nav-auth .btn-pill:hover {
+                    background: var(--teal-dark);
+                    text-decoration: none;
+                    transform: translateY(-1px);
+                }
+
+            .nav-auth .sep {
+                width: 1px;
+                height: 16px;
+                background: #cce4e0;
+            }
+
+            .nav-auth .user {
+                color: var(--muted);
+                font-weight: 600;
+            }
+
+            .nav-auth .role-pill {
+                padding: 3px 10px;
+                border-radius: 20px;
+                background: var(--teal-soft);
+                color: var(--teal-dark);
+                font-size: 12px;
+                font-weight: 700;
+            }
+
+        /* ---------- Hero Section ---------- */
+        .hero-section {
+            position: relative;
+            background: radial-gradient(600px 500px at -5% 30%, rgba(20, 184, 166, .14), transparent 70%), radial-gradient(550px 450px at 105% 5%, rgba(13, 148, 136, .10), transparent 70%), #ffffff;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            align-items: center;
+            padding: 40px 48px 80px;
+            max-width: 1360px;
+            min-height: calc(100vh - 80px);
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .hero-text {
+            position: relative;
+            z-index: 4;
+            max-width: 580px;
+        }
+
+        .tag-pill {
+            display: inline-block;
+            padding: 6px 16px;
+            background: var(--teal-soft);
+            color: var(--teal-dark);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: clamp(38px, 4.5vw, 62px);
+            font-weight: 800;
+            line-height: 1.08;
+            letter-spacing: -1.5px;
+            margin-bottom: 24px;
+        }
+
+        .hero-text p {
+            color: #6b8589;
+            font-size: 16px;
+            line-height: 1.7;
+            max-width: 440px;
+            margin-bottom: 38px;
+        }
+
+        .hero-cta {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn-start {
+            display: inline-flex;
+            align-items: center;
+            padding: 17px 38px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #12a594, #0d7f78);
+            color: #fff;
+            font-size: 15.5px;
+            font-weight: 700;
+            box-shadow: 0 14px 28px rgba(13, 127, 120, .28);
+            transition: transform .18s, box-shadow .18s;
+        }
+
+            .btn-start:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 18px 34px rgba(13, 127, 120, .36);
+            }
+
+        .learn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--teal);
+            font-size: 14.5px;
+            font-weight: 700;
+            transition: color .2s;
+        }
+
+            .learn:hover {
+                color: var(--teal-dark);
+            }
+
+        .play {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #d9f3ef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform .2s ease;
+        }
+
+        .learn:hover .play {
+            transform: scale(1.08);
+        }
+
+        /* ---------- Visual ---------- */
+        .visual {
+            position: relative;
+            height: 520px;
+        }
+
+        .lines {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .blob {
+            position: absolute;
+            left: 50%;
+            bottom: -24px;
+            width: 450px;
+            height: 450px;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background: linear-gradient(160deg, rgba(20, 184, 166, .26), rgba(13, 127, 120, .05));
+            z-index: 1;
+        }
+
+        /* Hero image: JPG card style (works with or without transparent background) */
+        .hero-img {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 400px;
+            width: 400px;
+            max-width: 100%;
+            object-fit: cover;
+            object-position: center 35%;
+            border-radius: 50%;
+            border: 8px solid #ffffff;
+            box-shadow: 0 24px 48px rgba(15, 61, 62, .18);
+            z-index: 2;
+        }
+
+        .badge {
+            position: absolute;
+            width: 58px;
+            height: 58px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, .7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, .95);
+            box-shadow: 0 10px 24px rgba(15, 61, 62, .12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .b1 {
+            right: 14%;
+            top: 40%;
+        }
+
+        .b2 {
+            left: 14%;
+            top: 66%;
+            animation-delay: 1.2s;
+        }
+
+        .b3 {
+            right: 8%;
+            top: 80%;
+            animation-delay: 2.4s;
+        }
+
+        @@keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* ---------- Common Section Layout ---------- */
+        .section {
+            padding: 90px 48px;
+            max-width: 1360px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 650px;
+            margin: 0 auto 56px;
+        }
+
+            .section-header .sub {
+                color: var(--teal);
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                margin-bottom: 8px;
+                display: inline-block;
+            }
+
+            .section-header h2 {
+                font-size: 34px;
+                font-weight: 800;
+                letter-spacing: -0.8px;
+                margin-bottom: 12px;
+            }
+
+            .section-header p {
+                color: var(--muted);
+                font-size: 15.5px;
+                line-height: 1.6;
+            }
+
+        /* ---------- Courses Section ---------- */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 28px;
+            margin-bottom: 40px;
+        }
+
+        .course-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 8px 24px rgba(15, 61, 62, 0.04);
+            transition: all .25s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+            .course-card:hover {
+                transform: translateY(-6px);
+                border-color: rgba(13, 148, 136, 0.4);
+                box-shadow: 0 16px 36px var(--teal-glow);
+            }
+
+        .course-badge {
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--teal-soft);
+            color: var(--teal-dark);
+            padding: 4px 12px;
+            border-radius: 8px;
+            align-self: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .course-title {
+            font-size: 19px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--ink);
+        }
+
+        .course-desc {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 18px;
+            border-top: 1px solid #f0f7f6;
+            font-size: 13px;
+            font-weight: 600;
+            color: #799a9f;
+        }
+
+        .course-action {
+            display: inline-block;
+            color: var(--teal);
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .courses-center-btn {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 34px;
+            border-radius: 12px;
+            border: 2px solid var(--teal);
+            color: var(--teal);
+            font-weight: 700;
+            font-size: 15px;
+            transition: all .2s;
+        }
+
+            .btn-outline:hover {
+                background: var(--teal);
+                color: #ffffff;
+                box-shadow: 0 10px 24px rgba(13, 148, 136, .2);
+            }
+
+        /* ---------- How It Works Section ---------- */
+        .how-section {
+            background: #f8fcfa;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+
+        .step-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 38px 30px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 8px 20px rgba(15, 61, 62, 0.03);
+            transition: transform .25s ease;
+        }
+
+            .step-card:hover {
+                transform: translateY(-5px);
+            }
+
+        .step-number {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 800;
+            margin: 0 auto 24px;
+            box-shadow: 0 8px 18px rgba(13, 148, 136, 0.25);
+        }
+
+        .step-card h3 {
+            font-size: 19px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--ink);
+        }
+
+        .step-card p {
+            color: var(--muted);
+            font-size: 14.5px;
+            line-height: 1.6;
+        }
+
+        /* ---------- About Section ---------- */
+        .about-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .about-content h2 {
+            font-size: 36px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .about-content p {
+            color: #638489;
+            font-size: 15.5px;
+            line-height: 1.7;
+            margin-bottom: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .stat-box {
+            background: #f7fbfa;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 24px;
+            text-align: center;
+        }
+
+            .stat-box .number {
+                font-size: 34px;
+                font-weight: 800;
+                color: var(--teal);
+                margin-bottom: 6px;
+            }
+
+            .stat-box .label {
+                font-size: 13.5px;
+                font-weight: 600;
+                color: var(--muted);
+            }
+
+        /* ---------- Contact Section ---------- */
+        .contact-section {
+            background: #f8fcfa;
+            border-top: 1px solid var(--border);
+        }
+
+        .contact-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 50px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 50px;
+            box-shadow: 0 16px 40px rgba(15, 61, 62, 0.05);
+        }
+
+        .contact-info h3 {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 14px;
+        }
+
+        .contact-info p {
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            font-size: 14.5px;
+            font-weight: 600;
+            color: #2b494d;
+        }
+
+        .info-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--teal-soft);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--teal);
+        }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 15px 18px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14.5px;
+            outline: none;
+            background: #fbfdfd;
+            transition: all .2s;
+        }
+
+            .form-group input:focus, .form-group textarea:focus {
+                border-color: var(--teal);
+                background: #ffffff;
+                box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+            }
+
+        .btn-submit {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            background: var(--teal);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .2s, transform .2s;
+        }
+
+            .btn-submit:hover {
+                background: var(--teal-dark);
+                transform: translateY(-2px);
+            }
+
+        /* ---------- Footer ---------- */
+        .footer {
+            background: #092022;
+            color: #a3c4c7;
+            padding: 60px 48px 30px;
+            font-size: 14px;
+        }
+
+        .footer-inner {
+            max-width: 1360px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .footer-brand {
+            font-size: 20px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 14px;
+        }
+
+            .footer-brand span {
+                color: var(--teal-light);
+            }
+
+        .footer p {
+            line-height: 1.6;
+            max-width: 320px;
+            font-size: 13.5px;
+        }
+
+        .footer-col h4 {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-col a {
+            color: #9cbabb;
+            transition: color .2s;
+        }
+
+            .footer-col a:hover {
+                color: var(--teal-light);
+            }
+
+        .footer-bottom {
+            max-width: 1360px;
+            margin: 24px auto 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #69898c;
+        }
+
+        /* ---------- Responsive ---------- */
+        @@media (max-width: 992px) {
+            .nav {
+                padding: 18px 24px;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+                padding: 20px 24px 60px;
+                text-align: center;
+            }
+
+            .hero-text {
+                max-width: 100%;
+            }
+
+                .hero-text p {
+                    margin: 0 auto 30px;
+                }
+
+            .hero-cta {
+                justify-content: center;
+            }
+
+            .visual {
+                height: 380px;
+                margin-top: 40px;
+            }
+
+            .lines {
+                display: none;
+            }
+
+            .steps-grid, .about-wrap, .contact-wrap, .footer-inner {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-wrap {
+                padding: 30px;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .section {
+                padding: 60px 20px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header / Navbar -->
+    <header class="nav-wrapper">
+        <nav class="nav">
+            <a href="#" class="nav-brand">
+                Portal<span>Registration</span>
+            </a>
+
+            <div class="nav-links">
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-controller="Students" asp-action="Index">Students</a>
+                    <a asp-controller="Departments" asp-action="Index">Departments</a>
+                    <a asp-controller="Courses" asp-action="Index">Courses</a>
+                    <a asp-controller="Enrollments" asp-action="Index">Enrollments</a>
+                }
+                else if (isAuth)
+                {
+                    <a asp-controller="Courses" asp-action="Index">Courses</a>
+                    <a asp-controller="Departments" asp-action="Index">Departments</a>
+                    <a href="#how-it-works">How it works</a>
+                    <a href="#contact">Contact</a>
+                }
+                else
+                {
+                    <a href="#courses">Courses</a>
+                    <a href="#how-it-works">How it works</a>
+                    <a href="#about">About</a>
+                    <a href="#contact">Contact</a>
+                }
+            </div>
+
+            <div class="nav-auth">
+                @if (isAuth)
+                {
+                    <span class="user">@User.Identity!.Name</span>
+                    <span class="role-pill">@(User.IsInRole("Admin") ? "Admin" : "Student")</span>
+                    <span class="sep"></span>
+                    <form asp-controller="Account" asp-action="Logout" method="post">
+                        <button type="submit">Logout</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login">Login</a>
+                    <span class="sep"></span>
+                    <a asp-controller="Account" asp-action="Register" class="btn-pill">Sign up</a>
+                }
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <section class="hero">
+            <div class="hero-text">
+                <h1>Register for Your Courses</h1>
+                <p>Browse your department’s courses, enroll in seconds, and track your academic progress in one simple, unified place.</p>
+
+                <div class="hero-cta">
+                    @if (isAuth)
+                    {
+                        <a class="btn-start" asp-controller="@startController" asp-action="Index">Get started</a>
+                    }
+                    else
+                    {
+                        <a class="btn-start" asp-controller="Account" asp-action="Register">Get started</a>
+                    }
+
+                    <a class="learn" href="#how-it-works">
+                        <span class="play">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#0d9488"><path d="M7 4v16l13-8z" /></svg>
+                        </span>
+                        Learn how
+                    </a>
+                </div>
+            </div>
+
+            <div class="visual">
+                <svg class="lines" viewBox="0 0 560 540" preserveAspectRatio="none" fill="none" stroke="rgba(13,148,136,.45)" stroke-width="1.2">
+                    <path d="M20 540 V210 Q20 175 46 152 L270 -20" />
+                    <path d="M300 150 L520 -10" />
+                    <path d="M330 540 L560 360" />
+                </svg>
+
+                <div class="blob"></div>
+                <img class="hero-img" src="https://www.thestatesman.com/wp-content/uploads/2020/09/QT-Indian-students.jpg" alt="Student" referrerpolicy="no-referrer" onerror="this.style.display='none'" />
+
+                <div class="badge b1">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="15" r="5" />
+                        <path d="M8.5 3 12 10l3.5-7" />
+                    </svg>
+                </div>
+                <div class="badge b2">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z" />
+                        <path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4" />
+                    </svg>
+                </div>
+                <div class="badge b3">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="9" r="6" />
+                        <path d="M8.5 14 7 22l5-3 5 3-1.5-8" />
+                    </svg>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Courses Section -->
+    <section class="section" id="courses">
+        <div class="section-header">
+            <span class="sub">Academic Catalog</span>
+            <h2>Available Department Courses</h2>
+            <p>Explore current term offerings across Computer Science, Information Systems, and Software Engineering.</p>
+        </div>
+
+        <div class="courses-grid">
+            <div class="course-card">
+                <div>
+                    <span class="course-badge">CS-301</span>
+                    <h3 class="course-title">Algorithms & Data Structures</h3>
+                    <p class="course-desc">Master foundational data structures, algorithmic complexity, sorting, graphs, and dynamic programming.</p>
+                </div>
+                <div class="course-meta">
+                    <span>3 Credit Hours</span>
+                    <a asp-controller="@courseController" asp-action="@courseAction" class="course-action">@(isAuth && !User.IsInRole("Admin") ? "Enroll →" : (!isAuth ? "Login to enroll →" : "Manage students →"))</a>
+                </div>
+            </div>
+
+            <div class="course-card">
+                <div>
+                    <span class="course-badge">IS-204</span>
+                    <h3 class="course-title">Database Management Systems</h3>
+                    <p class="course-desc">Relational databases, SQL queries, schema design, normalization, indexing, and transaction management.</p>
+                </div>
+                <div class="course-meta">
+                    <span>3 Credit Hours</span>
+                    <a asp-controller="@courseController" asp-action="@courseAction" class="course-action">@(isAuth && !User.IsInRole("Admin") ? "Enroll →" : (!isAuth ? "Login to enroll →" : "Manage students →"))</a>
+                </div>
+            </div>
+
+            <div class="course-card">
+                <div>
+                    <span class="course-badge">SE-402</span>
+                    <h3 class="course-title">Web Application Architecture</h3>
+                    <p class="course-desc">Modern full-stack web engineering, RESTful APIs, authentication workflows, and cloud deployment.</p>
+                </div>
+                <div class="course-meta">
+                    <span>4 Credit Hours</span>
+                    <a asp-controller="@courseController" asp-action="@courseAction" class="course-action">@(isAuth && !User.IsInRole("Admin") ? "Enroll →" : (!isAuth ? "Login to enroll →" : "Manage students →"))</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="courses-center-btn">
+            <a asp-controller="@courseController" asp-action="@courseAction" class="btn-outline">
+                @(isAuth && User.IsInRole("Admin") ? "Go to Student Management" : (!isAuth ? "Login to Browse Courses" : "Browse Full Course Catalog"))
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="section how-section" id="how-it-works">
+        <div class="section-header">
+            <span class="sub">Effortless Registration</span>
+            <h2>How It Works</h2>
+            <p>Complete your semester enrollment in 3 quick and intuitive steps.</p>
+        </div>
+
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">01</div>
+                <h3>Sign In / Create Account</h3>
+                <p>Log in with your university student credentials to access your personalized degree audit and department stream.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">02</div>
+                <h3>Select Your Subjects</h3>
+                <p>Choose elective and mandatory courses matching your academic prerequisites and preferred weekly schedule.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">03</div>
+                <h3>Confirm & Track Schedule</h3>
+                <p>Submit your selection instantly, receive confirmation, and monitor your enrolled classes on your dashboard.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="section" id="about">
+        <div class="about-wrap">
+            <div class="about-content">
+                <span class="tag-pill">About Our Platform</span>
+                <h2>Empowering Students with Modern Academic Tools</h2>
+                <p>Our Course Registration portal was built to eliminate paperwork and queues. By providing real-time course seat tracking, conflict checking, and department prerequisites, we ensure every student plans their future smoothly.</p>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="number">120+</div>
+                        <div class="label">Offered Courses</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number">4,500+</div>
+                        <div class="label">Active Students</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number">100%</div>
+                        <div class="label">Digital Enrollment</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number">24/7</div>
+                        <div class="label">Portal Availability</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="about-visual">
+                <div style="background: linear-gradient(135deg, rgba(20,184,166,0.12), rgba(13,148,136,0.04)); border: 1px solid var(--border); border-radius: 28px; padding: 48px; text-align: center;">
+                    <div style="width: 72px; height: 72px; border-radius: 24px; background: var(--teal); margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; color: white;">
+                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
+                    </div>
+                    <h3 style="font-size: 22px; font-weight: 800; margin-bottom: 12px;">Seamless Student Experience</h3>
+                    <p style="color: var(--muted); font-size: 14.5px; line-height: 1.6;">Designed according to university academic standards with instant prerequisite validation and automated timetable sync.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="section contact-section" id="contact">
+        <div class="contact-wrap">
+            <div class="contact-info">
+                <span class="tag-pill">Get In Touch</span>
+                <h3>Need Assistance with Registration?</h3>
+                <p>Have questions regarding course requirements or schedule conflicts? Our academic advisory team is here to assist you.</p>
+
+                <div class="info-item">
+                    <div class="info-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                    </div>
+                    <div>m.mohamedfouad2410@gmail.com</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                    </div>
+                    <div>+20 01288564633</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                    </div>
+                    <div>North Sinai - Al-Arish</div>
+                </div>
+            </div>
+
+            <form class="contact-form" onsubmit="event.preventDefault(); alert('Thank you! Your message has been sent to Academic Support.');">
+                <div class="form-group">
+                    <input type="text" placeholder="Your Full Name" required />
+                </div>
+                <div class="form-group">
+                    <input type="email" placeholder="Student Email Address" required />
+                </div>
+                <div class="form-group">
+                    <input type="text" placeholder="Academic ID / Department" />
+                </div>
+                <div class="form-group">
+                    <textarea rows="4" placeholder="How can we help you?" required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <div>
+                <div class="footer-brand">Portal<span>Registration</span></div>
+                <p>The central course registration and academic tracking system for students and faculty.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Navigation</h4>
+                <ul>
+                    <li><a href="#courses">Courses</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Students</h4>
+                <ul>
+                    <li><a asp-controller="Account" asp-action="Login">Student Portal</a></li>
+                    <li><a asp-controller="@courseController" asp-action="@courseAction">@(isAuth && User.IsInRole("Admin") ? "Student Management" : (!isAuth ? "Login to Course Catalog" : "Course Catalog"))</a></li>
+                    <li><a asp-controller="Account" asp-action="Register">Registration</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#contact">Academic Advising</a></li>
+                    <li><a href="#contact">Help Center</a></li>
+                    <li><a href="#contact">Campus FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; @DateTime.Now.Year Course Registration System. All rights reserved.</span>
+            <span>Fast &bull; Reliable &bull; Secure</span>
+        </div>
+    </footer>
+
+</body>
+</html>
